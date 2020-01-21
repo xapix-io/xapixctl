@@ -1,0 +1,27 @@
+AllCops:
+  TargetRubyVersion: 2.5
+  DisplayCopNames: true
+  Exclude:
+    - bin/*
+
+inherit_gem:
+  relaxed-rubocop: .rubocop.yml
+
+Documentation:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 120
+
+Layout/EmptyLineAfterGuardClause:
+  Enabled: false
+
+Layout/MultilineOperationIndentation:
+  EnforcedStyle: indented
+
+Style/OptionHash:
+  Enabled: true
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*

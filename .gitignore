@@ -10,5 +10,6 @@
 # rspec failure tracking
 .rspec_status
 
-# rvm
+# rvm and other tools
 .ruby-gemset
+.envrc
