@@ -98,7 +98,7 @@ module Xapixctl
       end
 
       def project_publications_path(org, project)
-        "/projects/#{org}/#{project}/project_publications"
+        "/projects/#{org}/#{project}/publications"
       end
 
       def resource_types_path
