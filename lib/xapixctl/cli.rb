@@ -197,7 +197,7 @@ module Xapixctl
     DOCUMENT_STRUCTURE = %w[version kind metadata definition].freeze
     def resources_from_file(filename)
       yaml_string = filename == '-' ? $stdin.read : IO.read(filename)
-      yaml_string.split(/^---\s*\n/).map { |yml| YAML.safe_load(yml) }.compact.each do |doc|
+      yaml_string.split(/^---\s*\n/).map { |yml| Psych.safe_load(yml) }.compact.each do |doc|
         unless (DOCUMENT_STRUCTURE - doc.keys.map(&:to_s)).empty?
           warn "does not look like a correct resource definition:"
           warn doc.inspect
