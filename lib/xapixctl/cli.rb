@@ -70,10 +70,7 @@ module Xapixctl
         res.on_success { |resource| puts resource }
         res.on_error { |err, result| warn_api_error("could not get", err, result) }
       end
-      # TODO get from API
-      %w[Ambassador AuthScheme Credential Proxy CacheConnection Schema DataSource EndpointGroup Endpoint StreamGroup Stream ApiPublishing ApiPublishingRole].each do |type|
-        get(type)
-      end
+      (connection.resource_types_for_export - ['Project']).each { |type| get(type) }
     end
 
     option :org, aliases: "-o", desc: "Organization", required: true

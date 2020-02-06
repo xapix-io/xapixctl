@@ -44,6 +44,25 @@ module Xapixctl
     }.freeze
 
     class Connection
+      # sorting is intentional to reflect dependencies when exporting
+      SUPPORTED_RESOURCE_TYPES = %w[
+        Project
+        Ambassador
+        AuthScheme
+        Credential
+        Proxy
+        CacheConnection
+        Schema
+        DataSource
+        Pipeline
+        EndpointGroup
+        Endpoint
+        StreamGroup
+        Stream
+        ApiPublishing
+        ApiPublishingRole
+      ].freeze
+
       def initialize(url, token)
         @client = RestClient::Resource.new(File.join(url, 'api/v1'), verify_ssl: false, accept: :json, content_type: :json, headers: { Authorization: "Bearer #{token}" })
       end
@@ -79,6 +98,14 @@ module Xapixctl
         ResultHandler.new(&block).
           prepare_data(->(data) { data['resource_types'] }).
           run { @client[resource_types_path].get }
+      end
+
+      def resource_types_for_export
+        @resource_types_for_export ||=
+          available_resource_types do |res|
+            res.on_success { |available_types| SUPPORTED_RESOURCE_TYPES & available_types.map { |desc| desc['type'] } }
+            res.on_error { |err, _response| raise err }
+          end
       end
 
       private
