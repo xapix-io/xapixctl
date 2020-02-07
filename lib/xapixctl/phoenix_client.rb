@@ -4,9 +4,9 @@ module Xapixctl
   module PhoenixClient
 
     class ResultHandler
-      def initialize
-        @success_handler = ->(result) { result }
-        @error_handler = ->(err, _response) { warn "Could not get data: #{err}" }
+      def initialize(default_success_handler: , default_error_handler:)
+        @success_handler = default_success_handler
+        @error_handler = default_error_handler
         @result_handler = nil
         yield self if block_given?
       end
@@ -44,6 +44,9 @@ module Xapixctl
     }.freeze
 
     class Connection
+      DEFAULT_SUCCESS_HANDLER = ->(result) { result }
+      DEFAULT_ERROR_HANDLER = ->(err, _response) { warn "Could not get data: #{err}" }
+
       # sorting is intentional to reflect dependencies when exporting
       SUPPORTED_RESOURCE_TYPES = %w[
         Project
@@ -65,37 +68,43 @@ module Xapixctl
 
       def initialize(url, token)
         @client = RestClient::Resource.new(File.join(url, 'api/v1'), verify_ssl: false, accept: :json, content_type: :json, headers: { Authorization: "Bearer #{token}" })
+        @default_success_handler = DEFAULT_SUCCESS_HANDLER
+        @default_error_handler = DEFAULT_ERROR_HANDLER
       end
 
+      def on_success(&block); @default_success_handler = block; self; end
+
+      def on_error(&block); @default_error_handler = block; self; end
+
       def resource(resource_type, resource_id, org:, project: nil, format: :hash, &block)
-        ResultHandler.new(&block).
+        result_handler(block).
           formatter(FORMATTERS[format]).
           run { @client[resource_path(org, project, resource_type, resource_id)].get }
       end
 
       def resource_ids(resource_type, org:, project: nil, &block)
-        ResultHandler.new(&block).
+        result_handler(block).
           prepare_data(->(data) { data['resource_ids'] }).
           run { @client[resources_path(org, project, resource_type)].get }
       end
 
       def apply(resource_description, org:, project: nil, &block)
-        ResultHandler.new(&block).
+        result_handler(block).
           run { @client[generic_resource_path(org, project)].put(resource_description.to_json) }
       end
 
       def delete(resource_type, resource_id, org:, project: nil, &block)
-        ResultHandler.new(&block).
+        result_handler(block).
           run { @client[resource_path(org, project, resource_type, resource_id)].delete }
       end
 
       def publish(org:, project:, &block)
-        ResultHandler.new(&block).
+        result_handler(block).
           run { @client[project_publications_path(org, project)].post('') }
       end
 
       def available_resource_types(&block)
-        ResultHandler.new(&block).
+        result_handler(block).
           prepare_data(->(data) { data['resource_types'] }).
           run { @client[resource_types_path].get }
       end
@@ -109,6 +118,10 @@ module Xapixctl
       end
 
       private
+
+      def result_handler(block)
+        ResultHandler.new(default_success_handler: @default_success_handler, default_error_handler: @default_error_handler, &block)
+      end
 
       def resource_path(org, project, type, id)
         type = translate_type(type)
