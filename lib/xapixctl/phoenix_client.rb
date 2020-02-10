@@ -4,7 +4,7 @@ module Xapixctl
   module PhoenixClient
 
     class ResultHandler
-      def initialize(default_success_handler: , default_error_handler:)
+      def initialize(default_success_handler:, default_error_handler:)
         @success_handler = default_success_handler
         @error_handler = default_error_handler
         @result_handler = nil
@@ -103,6 +103,11 @@ module Xapixctl
           run { @client[project_publications_path(org, project)].post('') }
       end
 
+      def logs(correlation_id, org:, project:, &block)
+        result_handler(block).
+          run { @client[project_logss_path(org, project, correlation_id)].get }
+      end
+
       def available_resource_types(&block)
         result_handler(block).
           prepare_data(->(data) { data['resource_types'] }).
@@ -139,6 +144,10 @@ module Xapixctl
 
       def project_publications_path(org, project)
         "/projects/#{org}/#{project}/publications"
+      end
+
+      def project_logss_path(org, project, correlation_id)
+        "/projects/#{org}/#{project}/logs/#{correlation_id}"
       end
 
       def resource_types_path
