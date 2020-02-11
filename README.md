@@ -1,5 +1,7 @@
 # xapixctl
 
+[![Gem Version](https://badge.fury.io/rb/xapixctl.svg)](https://badge.fury.io/rb/xapixctl)
+
 Xapix client library and command line tool
 
 ## Installation
