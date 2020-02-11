@@ -12,7 +12,28 @@ Install it via:
 
 To see more details on how to run xapixctl, use:
 
-    $ xapixctl help
+```
+$ xapixctl help
+
+Commands:
+  xapixctl api-resources                                # retrieves a list of all available resource types
+  xapixctl apply -f, --file=FILE -o, --org=ORG          # Create or update a resource from a file
+  xapixctl delete [TYPE ID] [-f FILE] -o, --org=ORG     # delete the resources in the file
+  xapixctl export -o, --org=ORG -p, --project=PROJECT   # retrieves all resources within a project
+  xapixctl get TYPE [ID] -o, --org=ORG                  # retrieve either all resources of given TYPE or just the resource of given TYPE and ID
+  xapixctl help [COMMAND]                               # Describe available commands or one specific command
+  xapixctl publish -o, --org=ORG -p, --project=PROJECT  # Publishes the current version of the given project
+
+Options:
+  -v, [--verbose], [--no-verbose]
+      [--xapix-url=XAPIX_URL]      # Fallback: environment variable XAPIX_URL. URL to Xapix. Default: https://cloud.xapix.io/
+      [--xapix-token=XAPIX_TOKEN]  # Fallback: environment variable XAPIX_TOKEN. Your access token.
+```
+
+The main commands to interact with Xapix are:
+* `xapixctl get TYPE` to list all the resources of a specific type. You can get the supported types with `xapixctl api-resources`. To see the complete resource definition instead of an overview use the `-f yaml` switch. Use `xapixctl help get` for more details.
+* `xapixctl apply` to create a new resource or update existing ones. Resources are matched using their type and id. If a resource with the same type and id already exists it is updated, otherwise a new one is created.
+* `xapixctl publish` to publish the current status of a project.
 
 
 ## Development
