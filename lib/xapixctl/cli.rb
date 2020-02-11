@@ -15,7 +15,7 @@ module Xapixctl
     option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
     desc "get TYPE [ID]", "retrieve either all resources of given TYPE or just the resource of given TYPE and ID"
     long_desc <<-LONGDESC
-      `xapctl get TYPE` will retrieve the list of all resources of given type.
+      `xapixctl get TYPE` will retrieve the list of all resources of given type.
 
       If requested on an organization (i.e. no project given), the following types are available:
       \x5 Project
@@ -26,10 +26,10 @@ module Xapixctl
       Use the format to switch between the different output formats.
 
       Examples:
-      \x5> $ xapctl get -o xapix Project
-      \x5> $ xapctl get -o xapix Project some-project
-      \x5> $ xapctl get -o xapix -p some-project DataSource
-      \x5> $ xapctl get -o xapix -p some-project DataSource get-a-list
+      \x5> $ xapixctl get -o xapix Project
+      \x5> $ xapixctl get -o xapix Project some-project
+      \x5> $ xapixctl get -o xapix -p some-project DataSource
+      \x5> $ xapixctl get -o xapix -p some-project DataSource get-a-list
     LONGDESC
     def get(resource_type, resource_id = nil)
       if resource_id
@@ -57,13 +57,13 @@ module Xapixctl
     option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
     desc "export", "retrieves all resources within a project"
     long_desc <<-LONGDESC
-      `xapctl export` will retrieve the list of all resources of given type.
+      `xapixctl export` will retrieve the list of all resources of given type.
 
       Use the format to switch between the different output formats.
 
       Examples:
-      \x5> $ xapctl export -o xapix -p some-project
-      \x5> $ xapctl export -o xapix -p some-project -f yaml > some_project.yaml
+      \x5> $ xapixctl export -o xapix -p some-project
+      \x5> $ xapixctl export -o xapix -p some-project -f yaml > some_project.yaml
     LONGDESC
     def export
       connection.resource('Project', options[:project], org: options[:org], format: options[:format].to_sym) do |res|
@@ -78,7 +78,7 @@ module Xapixctl
     option :file, aliases: "-f", required: true
     desc "apply", "Create or update a resource from a file"
     long_desc <<-LONGDESC
-      `xapctl apply -f FILE` will apply the given resource description.
+      `xapixctl apply -f FILE` will apply the given resource description.
 
       If applied on an organization (i.e. no project given), the project is taken from the resource description.
 
@@ -88,11 +88,11 @@ module Xapixctl
       You can also read from stdin by using '-'.
 
       Examples:
-      \x5> $ xapctl apply -o xapix -f get_a_list.yaml
-      \x5> $ xapctl apply -o xapix -p some-project -f get_a_list.yaml
+      \x5> $ xapixctl apply -o xapix -f get_a_list.yaml
+      \x5> $ xapixctl apply -o xapix -p some-project -f get_a_list.yaml
 
       To copy over all data sources from one project to another:
-      \x5> $ xapctl get -o xapix-old -p some-project DataSource -f yaml | xapctl apply -o xapix-new -f -
+      \x5> $ xapixctl get -o xapix-old -p some-project DataSource -f yaml | xapixctl apply -o xapix-new -f -
     LONGDESC
     def apply
       resources_from_file(options[:file]) do |desc|
@@ -109,16 +109,16 @@ module Xapixctl
     option :file, aliases: "-f"
     desc "delete [TYPE ID] [-f FILE]", "delete the resources in the file"
     long_desc <<-LONGDESC
-      `xapctl delete -f FILE` will delete all the resources listed in the file.
-      \x5`xapctl delete TYPE ID` will delete the resource by given TYPE and ID.
+      `xapixctl delete -f FILE` will delete all the resources listed in the file.
+      \x5`xapixctl delete TYPE ID` will delete the resource by given TYPE and ID.
 
       The given file should be in YAML format and can contain multiple resource definitions, each as it's own YAML document.
       You can also read from stdin by using '-'.
 
       Examples:
-      \x5> $ xapctl delete -o xapix -p some-project -f get_a_list.yaml
-      \x5> $ xapctl delete -o xapix -p some-project DataSource get-a-list
-      \x5> $ xapctl delete -o xapix Project some-project
+      \x5> $ xapixctl delete -o xapix -p some-project -f get_a_list.yaml
+      \x5> $ xapixctl delete -o xapix -p some-project DataSource get-a-list
+      \x5> $ xapixctl delete -o xapix Project some-project
     LONGDESC
     def delete(resource_type = nil, resource_id = nil)
       if resource_type && resource_id
@@ -145,10 +145,10 @@ module Xapixctl
     option :project, aliases: "-p", desc: "Project", required: true
     desc "publish", "Publishes the current version of the given project"
     long_desc <<-LONGDESC
-      `xapctl publish` will publish the given project.
+      `xapixctl publish` will publish the given project.
 
       Examples:
-      \x5> $ xapctl publish -o xapix -p some-project
+      \x5> $ xapixctl publish -o xapix -p some-project
     LONGDESC
     def publish
       connection.publish(org: options[:org], project: options[:project]) do |res|
@@ -161,12 +161,12 @@ module Xapixctl
     option :project, aliases: "-p", desc: "Project", required: true
     desc "logs CORRELATION_ID", "Retrieves the execution logs for the given correlation ID"
     long_desc <<-LONGDESC
-      `xapctl logs CORRELATION_ID` will retrieve execution logs for the given correlation ID.
+      `xapixctl logs CORRELATION_ID` will retrieve execution logs for the given correlation ID.
 
       The correlation ID is included as X-Correlation-Id header in the response of each request.
 
       Examples:
-      \x5> $ xapctl logs be9c8608-e291-460d-bc20-5a394c4079d4 -o xapix -p some-project
+      \x5> $ xapixctl logs be9c8608-e291-460d-bc20-5a394c4079d4 -o xapix -p some-project
     LONGDESC
     def logs(correlation_id)
       connection.logs(correlation_id, org: options[:org], project: options[:project]) do |res|
