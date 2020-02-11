@@ -16,13 +16,14 @@ To see more details on how to run xapixctl, use:
 $ xapixctl help
 
 Commands:
-  xapixctl api-resources                                # retrieves a list of all available resource types
-  xapixctl apply -f, --file=FILE -o, --org=ORG          # Create or update a resource from a file
-  xapixctl delete [TYPE ID] [-f FILE] -o, --org=ORG     # delete the resources in the file
-  xapixctl export -o, --org=ORG -p, --project=PROJECT   # retrieves all resources within a project
-  xapixctl get TYPE [ID] -o, --org=ORG                  # retrieve either all resources of given TYPE or just the resource of given TYPE and ID
-  xapixctl help [COMMAND]                               # Describe available commands or one specific command
-  xapixctl publish -o, --org=ORG -p, --project=PROJECT  # Publishes the current version of the given project
+  xapixctl api-resources                                            # retrieves a list of all available resource types
+  xapixctl apply -f, --file=FILE -o, --org=ORG                      # Create or update a resource from a file
+  xapixctl delete [TYPE ID] [-f FILE] -o, --org=ORG                 # delete the resources in the file
+  xapixctl export -o, --org=ORG -p, --project=PROJECT               # retrieves all resources within a project
+  xapixctl get TYPE [ID] -o, --org=ORG                              # retrieve either all resources of given TYPE or just the resource of given TYPE and ID
+  xapixctl help [COMMAND]                                           # Describe available commands or one specific command
+  xapixctl logs CORRELATION_ID -o, --org=ORG -p, --project=PROJECT  # Retrieves the execution logs for the given correlation ID
+  xapixctl publish -o, --org=ORG -p, --project=PROJECT              # Publishes the current version of the given project
 
 Options:
   -v, [--verbose], [--no-verbose]

@@ -157,6 +157,24 @@ module Xapixctl
       end
     end
 
+    option :org, aliases: "-o", desc: "Organization", required: true
+    option :project, aliases: "-p", desc: "Project", required: true
+    desc "logs CORRELATION_ID", "Retrieves the execution logs for the given correlation ID"
+    long_desc <<-LONGDESC
+      `xapctl logs CORRELATION_ID` will retrieve execution logs for the given correlation ID.
+
+      The correlation ID is included as X-Correlation-Id header in the response of each request.
+
+      Examples:
+      \x5> $ xapctl logs be9c8608-e291-460d-bc20-5a394c4079d4 -o xapix -p some-project
+    LONGDESC
+    def logs(correlation_id)
+      connection.logs(correlation_id, org: options[:org], project: options[:project]) do |res|
+        res.on_success { |result| puts result['logs'].to_yaml }
+        res.on_error { |err, result| warn_api_error('could not get logs', err, result) }
+      end
+    end
+
     SUPPORTED_CONTEXTS = ['Project', 'Organization'].freeze
     desc "api-resources", "retrieves a list of all available resource types"
     def api_resources
