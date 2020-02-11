@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{xapix client library and command line tool}
   spec.homepage      = "https://github.com/xapix-io/xapixctl"
-  spec.license       = "Eclipse Public License 2.0"
+  spec.license       = "EPL-2.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
@@ -25,12 +25,12 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "activesupport", "~> 5.2.3"
-  spec.add_dependency "thor", "~> 0.20.3"
   spec.add_dependency "rest-client", "~> 2.1.0"
+  spec.add_dependency "thor", "~> 0.20.3"
 
   spec.add_development_dependency "bundler", "~> 1.17.3"
   spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "relaxed-rubocop"
+  spec.add_development_dependency "relaxed-rubocop", "~> 2.5"
   spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "rubocop"
+  spec.add_development_dependency "rubocop", "~> 0.79.0"
 end

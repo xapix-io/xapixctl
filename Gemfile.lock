@@ -77,9 +77,9 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.17.3)
   rake (~> 10.0)
-  relaxed-rubocop
+  relaxed-rubocop (~> 2.5)
   rspec (~> 3.0)
-  rubocop
+  rubocop (~> 0.79.0)
   xapixctl!
 
 BUNDLED WITH
