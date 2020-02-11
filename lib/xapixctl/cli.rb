@@ -8,7 +8,7 @@ module Xapixctl
 
     class_option :verbose, type: :boolean, aliases: "-v"
     class_option :xapix_url, desc: "Fallback: environment variable XAPIX_URL. URL to Xapix. Default: https://cloud.xapix.io/"
-    class_option :xapix_token, desc: "Falback: environment variable XAPIX_TOKEN. Your access token."
+    class_option :xapix_token, desc: "Fallback: environment variable XAPIX_TOKEN. Your access token."
 
     option :org, aliases: "-o", desc: "Organization", required: true
     option :project, aliases: "-p", desc: "Project"
