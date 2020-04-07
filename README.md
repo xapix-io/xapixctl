@@ -10,6 +10,12 @@ Install it via:
 
     $ gem install xapixctl
 
+On Windows make sure you have ruby installed:
+
+    $ choco install ruby -y
+    $ refreshenv
+    $ gem install xapixctl
+
 ## Usage
 
 To see more details on how to run xapixctl, use:
