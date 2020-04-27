@@ -143,6 +143,39 @@ module Xapixctl
 
     option :org, aliases: "-o", desc: "Organization", required: true
     option :project, aliases: "-p", desc: "Project", required: true
+    desc "preview", "Preview a pipeline or endpoint"
+    long_desc <<-LONGDESC
+      `xapixctl preview` will return a preview of the given pipeline or endpoint.
+
+      The preview function will not call any external data sources but calculate a preview based on the provided sample data.
+
+      Examples:
+      \x5> $ xapixctl preview -o xapix -p some-project pipeline
+      \x5> $ xapixctl preview -o xapix -p some-project endpoint
+    LONGDESC
+    def preview(pipeline)
+      connection.preview(org: options[:org], project: options[:project], pipeline: pipeline) do |res|
+        res.on_success do |result|
+          preview = result['preview']
+          if ['RestJson', 'SoapXml'].include?(result['content_type'])
+            if preview.is_a?(Hash)
+              puts "HTTP #{preview['status']}"
+              preview['headers']&.each { |h, v| puts "#{h}: #{v}" }
+              puts
+              puts preview['body']
+            else
+              puts preview
+            end
+          else
+            puts preview.to_yaml
+          end
+        end
+        res.on_error { |err, result| warn_api_error('could not fetch preview', err, result) }
+      end
+    end
+
+    option :org, aliases: "-o", desc: "Organization", required: true
+    option :project, aliases: "-p", desc: "Project", required: true
     desc "publish", "Publishes the current version of the given project"
     long_desc <<-LONGDESC
       `xapixctl publish` will publish the given project.

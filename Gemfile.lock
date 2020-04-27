@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    xapixctl (1.0.0)
+    xapixctl (1.0.1)
       activesupport (~> 5.2.3)
       rest-client (~> 2.1.0)
       thor (~> 0.20.3)

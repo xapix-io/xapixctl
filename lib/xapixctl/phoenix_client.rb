@@ -98,6 +98,12 @@ module Xapixctl
           run { @client[resource_path(org, project, resource_type, resource_id)].delete }
       end
 
+      def preview(org:, project:, pipeline:, &block)
+        result_handler(block).
+          prepare_data(->(data) { data['pipeline_preview'] }).
+          run { @client[pipeline_preview_path(org, project, pipeline)].get }
+      end
+
       def publish(org:, project:, &block)
         result_handler(block).
           run { @client[project_publications_path(org, project)].post('') }
@@ -140,6 +146,10 @@ module Xapixctl
 
       def generic_resource_path(org, project)
         project ? "projects/#{org}/#{project}/resource" : "orgs/#{org}/resource"
+      end
+
+      def pipeline_preview_path(org, project, pipeline)
+        "/projects/#{org}/#{project}/pipelines/#{pipeline}/preview"
       end
 
       def project_publications_path(org, project)
