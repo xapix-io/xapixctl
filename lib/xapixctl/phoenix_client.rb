@@ -43,6 +43,28 @@ module Xapixctl
       text: ->(data) { (TEXT_FORMATTERS[data.dig('metadata', 'type')] || TEXT_FORMATTERS[:all]).call(data) }
     }.freeze
 
+    PREVIEW_FORMATTERS = {
+      json: ->(data) { JSON.pretty_generate(data) },
+      yaml: ->(data) { Psych.dump(data) },
+      text: ->(data) do
+        preview = data['preview']
+        if ['RestJson', 'SoapXml'].include?(data['content_type'])
+          res = StringIO.new
+          if preview.is_a?(Hash)
+            res.puts "HTTP #{preview['status']}"
+            preview['headers']&.each { |h, v| res.puts "#{h}: #{v}" }
+            res.puts
+            res.puts preview['body']
+          else
+            res.puts preview
+          end
+          res.string
+        else
+          Psych.dump(preview)
+        end
+      end
+    }.freeze
+
     class Connection
       DEFAULT_SUCCESS_HANDLER = ->(result) { result }
       DEFAULT_ERROR_HANDLER = ->(err, _response) { warn "Could not get data: #{err}" }
@@ -98,10 +120,18 @@ module Xapixctl
           run { @client[resource_path(org, project, resource_type, resource_id)].delete }
       end
 
-      def preview(org:, project:, pipeline:, &block)
+      def pipeline_preview(pipeline_id, org:, project:, format: :hash, &block)
         result_handler(block).
           prepare_data(->(data) { data['pipeline_preview'] }).
-          run { @client[pipeline_preview_path(org, project, pipeline)].get }
+          formatter(PREVIEW_FORMATTERS[format]).
+          run { @client[pipeline_preview_path(org, project, pipeline_id)].get }
+      end
+
+      def endpoint_preview(endpoint_id, org:, project:, format: :hash, &block)
+        result_handler(block).
+          prepare_data(->(data) { data['endpoint_preview'] }).
+          formatter(PREVIEW_FORMATTERS[format]).
+          run { @client[endpoint_preview_path(org, project, endpoint_id)].get }
       end
 
       def publish(org:, project:, &block)
@@ -150,6 +180,10 @@ module Xapixctl
 
       def pipeline_preview_path(org, project, pipeline)
         "/projects/#{org}/#{project}/pipelines/#{pipeline}/preview"
+      end
+
+      def endpoint_preview_path(org, project, endpoint)
+        "/projects/#{org}/#{project}/endpoints/#{endpoint}/preview"
       end
 
       def project_publications_path(org, project)

@@ -143,33 +143,40 @@ module Xapixctl
 
     option :org, aliases: "-o", desc: "Organization", required: true
     option :project, aliases: "-p", desc: "Project", required: true
-    desc "preview", "Preview a pipeline or endpoint"
+    option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
+    desc "preview ID", "Preview a pipeline"
     long_desc <<-LONGDESC
-      `xapixctl preview` will return a preview of the given pipeline or endpoint.
+      `xapixctl preview` will return a preview of the given pipeline.
+
+      The preview function will not call any external data sources but calculate a preview based on the provided sample data.
+
+      To preview a pipeline attached to an endpoint, please use `xapixctl preview-ep` to see the correct preview.
+
+      Examples:
+      \x5> $ xapixctl preview -o xapix -p some-project pipeline
+    LONGDESC
+    def preview(pipeline)
+      connection.pipeline_preview(pipeline, org: options[:org], project: options[:project], format: options[:format].to_sym) do |res|
+        res.on_success { |preview| puts preview }
+        res.on_error { |err, result| warn_api_error('could not fetch preview', err, result) }
+      end
+    end
+
+    option :org, aliases: "-o", desc: "Organization", required: true
+    option :project, aliases: "-p", desc: "Project", required: true
+    option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
+    desc "preview-ep ID", "Preview an endpoint"
+    long_desc <<-LONGDESC
+      `xapixctl preview-ep` will return a preview of the given endpoint.
 
       The preview function will not call any external data sources but calculate a preview based on the provided sample data.
 
       Examples:
-      \x5> $ xapixctl preview -o xapix -p some-project pipeline
-      \x5> $ xapixctl preview -o xapix -p some-project endpoint
+      \x5> $ xapixctl preview-ep -o xapix -p some-project endpoint
     LONGDESC
-    def preview(pipeline)
-      connection.preview(org: options[:org], project: options[:project], pipeline: pipeline) do |res|
-        res.on_success do |result|
-          preview = result['preview']
-          if ['RestJson', 'SoapXml'].include?(result['content_type'])
-            if preview.is_a?(Hash)
-              puts "HTTP #{preview['status']}"
-              preview['headers']&.each { |h, v| puts "#{h}: #{v}" }
-              puts
-              puts preview['body']
-            else
-              puts preview
-            end
-          else
-            puts preview.to_yaml
-          end
-        end
+    def preview_ep(endpoint)
+      connection.endpoint_preview(endpoint, org: options[:org], project: options[:project], format: options[:format].to_sym) do |res|
+        res.on_success { |preview| puts preview }
         res.on_error { |err, result| warn_api_error('could not fetch preview', err, result) }
       end
     end
