@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rest-client", "~> 2.1.0"
   spec.add_dependency "thor", "~> 0.20.3"
 
-  spec.add_development_dependency "bundler", "~> 1.17.3"
+  spec.add_development_dependency "bundler", "~> 2.1.4"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "relaxed-rubocop", "~> 2.5"
   spec.add_development_dependency "rspec", "~> 3.0"
