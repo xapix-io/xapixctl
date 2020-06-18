@@ -158,6 +158,10 @@ module Xapixctl
           end
       end
 
+      def onboarding(org:, project:)
+        OnboardingConnection.new(@client, @default_success_handler, @default_error_handler, org, project)
+      end
+
       private
 
       def result_handler(block)
@@ -201,6 +205,49 @@ module Xapixctl
       def translate_type(resource_type)
         return 'ApiPublishingRole' if resource_type == 'ApiPublishing/Role'
         resource_type.sub(%r[/.*], '') # cut off everything after first slash
+      end
+    end
+
+    class OnboardingConnection
+      def initialize(client, default_success_handler, default_error_handler, org, project)
+        @client = client
+        @default_success_handler = default_success_handler
+        @default_error_handler = default_error_handler
+        @org = org
+        @project = project
+      end
+
+      # Notes:
+      # - Query parameters should be part of the URL
+      # - Path parameters should be marked with `{name}` in the URL, and values should be given in path_params hash
+      # - Headers should be given in headers hash
+      # - Body has to be a string
+      def add_rest_data_source(http_method:, url:, path_params: {}, headers: {}, body: nil, &block)
+        data_source_details = {
+          http_method: http_method, url: url,
+          parameters: { path: path_params.to_query, header: headers.to_query, body: body }
+        }
+        result_handler(block).
+          run { @client[rest_data_source_path].post(data_source: data_source_details) }
+      end
+
+      def preview_data_source(data_source_id, &block)
+        result_handler(block).
+          run { @client[data_source_preview_path(data_source_id)].post('') }
+      end
+
+      private
+
+      def result_handler(block)
+        ResultHandler.new(default_success_handler: @default_success_handler, default_error_handler: @default_error_handler, &block)
+      end
+
+      def rest_data_source_path
+        "/projects/#{@org}/#{@project}/onboarding/data_sources/rest"
+      end
+
+      def data_source_preview_path(id)
+        "/projects/#{@org}/#{@project}/onboarding/data_sources/#{id}/preview"
       end
     end
   end
