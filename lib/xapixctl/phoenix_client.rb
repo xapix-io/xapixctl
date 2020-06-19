@@ -217,23 +217,57 @@ module Xapixctl
         @project = project
       end
 
-      # Notes:
+      # Notes on parameters:
       # - Query parameters should be part of the URL
       # - Path parameters should be marked with `{name}` in the URL, and values should be given in path_params hash
       # - Headers should be given in headers hash
-      # - Body has to be a string
-      def add_rest_data_source(http_method:, url:, path_params: {}, headers: {}, body: nil, &block)
+      # - Cookies should be given in cookies hash
+      # - The body has to be given as a string
+      # - The required authentication schemes should be listed, referring to previously created schemes
+      #
+      # This returns a hash like the following:
+      #   "data_source" => { "id" => id, "resource_description" => resource_description }
+      #
+      # To successfully onboard a DB using the API, the following steps are needed:
+      #  1. setup the data source using add_rest_data_source.
+      #  2. retrieve a preview using preview_data_source using the id returned by previous step
+      #  3. confirm preview
+      #  4. call accept_data_source_preview to complete onboarding
+      #
+      def add_rest_data_source(http_method:, url:, path_params: {}, headers: {}, cookies: {}, body: nil, auth_schemes: [], &block)
         data_source_details = {
           http_method: http_method, url: url,
-          parameters: { path: path_params.to_query, header: headers.to_query, body: body }
+          parameters: { path: path_params.to_query, header: headers.to_query, cookies: cookies.to_query, body: body },
+          auth_schemes: auth_schemes
         }
         result_handler(block).
           run { @client[rest_data_source_path].post(data_source: data_source_details) }
       end
 
-      def preview_data_source(data_source_id, &block)
+      # Notes on parameters:
+      # - To call a data source which requires authentication, provide a hash with each required auth scheme as key and
+      #   as the value a reference to a previously created credential.
+      #   Example: { scheme_ref1 => credential_ref1, scheme_ref2 => credential_ref2 }
+      #
+      # This returns a hashified preview like the following:
+      #   { "preview" => {
+      #       "sample" => { "status" => integer, "body" => { ... }, "headers" => { ... }, "cookies" => { ... } },
+      #       "fetched_at" => Timestamp },
+      #     "data_source" => { "id" => id, "resource_description" => resource_description } }
+      #
+      def preview_data_source(data_source_id, authentications: {}, &block)
+        preview_data = {
+          authentications: authentications.map { |scheme, cred| { auth_scheme_id: scheme, auth_credential_id: cred } }
+        }
         result_handler(block).
-          run { @client[data_source_preview_path(data_source_id)].post('') }
+          run { @client[data_source_preview_path(data_source_id)].post(preview_data) }
+      end
+
+      # This returns a hashified preview like the following:
+
+      def accept_data_source_preview(data_source_id, &block)
+        result_handler(block).
+          run { @client[data_source_preview_path(data_source_id)].patch('') }
       end
 
       private
