@@ -43,5 +43,24 @@ module Xapixctl
         res.on_error { |err, result| warn_api_error('could not fetch preview', err, result) }
       end
     end
+
+    option :org, aliases: "-o", desc: "Organization", required: true
+    option :project, aliases: "-p", desc: "Project", required: true
+    option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
+    desc "stream-processor ID", "Preview a stream processor"
+    long_desc <<-LONGDESC
+      `xapixctl preview stream-processor` will return a preview of the given stream processor.
+
+      The preview function will not call any external data sources but calculate a preview based on the provided sample data.
+
+      Examples:
+      \x5> $ xapixctl preview stream-processor -o xapix -p some-project processor
+    LONGDESC
+    def stream_processor(stream_processor)
+      connection.stream_processor_preview(stream_processor, org: options[:org], project: options[:project], format: options[:format].to_sym) do |res|
+        res.on_success { |preview| puts preview }
+        res.on_error { |err, result| warn_api_error('could not fetch preview', err, result) }
+      end
+    end
   end
 end

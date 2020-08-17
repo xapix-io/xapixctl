@@ -86,6 +86,7 @@ module Xapixctl
         StreamGroup
         Stream
         Scheduler
+        StreamProcessor
         ApiPublishing
         ApiPublishingRole
       ].freeze
@@ -134,6 +135,13 @@ module Xapixctl
           prepare_data(->(data) { data['endpoint_preview'] }).
           formatter(PREVIEW_FORMATTERS[format]).
           run { @client[endpoint_preview_path(org, project, endpoint_id)].get }
+      end
+
+      def stream_processor_preview(stream_processor_id, org:, project:, format: :hash, &block)
+        result_handler(block).
+          prepare_data(->(data) { data['stream_processor_preview'] }).
+          formatter(PREVIEW_FORMATTERS[format]).
+          run { @client[stream_processor_preview_path(org, project, stream_processor_id)].get }
       end
 
       def publish(org:, project:, &block)
@@ -190,6 +198,10 @@ module Xapixctl
 
       def endpoint_preview_path(org, project, endpoint)
         "/projects/#{org}/#{project}/endpoints/#{endpoint}/preview"
+      end
+
+      def stream_processor_preview_path(org, project, stream_processor)
+        "/projects/#{org}/#{project}/stream_processors/#{stream_processor}/preview"
       end
 
       def project_publications_path(org, project)
