@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
-require 'thor'
+require 'xapixctl/base_cli'
+require 'xapixctl/preview_cli'
 
 module Xapixctl
-  class Cli < Thor
-    def self.exit_on_failure?; true; end
-
-    class_option :verbose, type: :boolean, aliases: "-v"
-    class_option :xapix_url, desc: "Fallback: environment variable XAPIX_URL. URL to Xapix. Default: https://cloud.xapix.io/"
-    class_option :xapix_token, desc: "Fallback: environment variable XAPIX_TOKEN. Your access token."
+  class Cli < BaseCli
+    desc "preview SUBCOMMAND ...ARGS", "Request preview for resources"
+    subcommand "preview", Preview
 
     option :org, aliases: "-o", desc: "Organization", required: true
     option :project, aliases: "-p", desc: "Project"
@@ -143,46 +141,6 @@ module Xapixctl
 
     option :org, aliases: "-o", desc: "Organization", required: true
     option :project, aliases: "-p", desc: "Project", required: true
-    option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
-    desc "preview ID", "Preview a pipeline"
-    long_desc <<-LONGDESC
-      `xapixctl preview` will return a preview of the given pipeline.
-
-      The preview function will not call any external data sources but calculate a preview based on the provided sample data.
-
-      To preview a pipeline attached to an endpoint, please use `xapixctl preview-ep` to see the correct preview.
-
-      Examples:
-      \x5> $ xapixctl preview -o xapix -p some-project pipeline
-    LONGDESC
-    def preview(pipeline)
-      connection.pipeline_preview(pipeline, org: options[:org], project: options[:project], format: options[:format].to_sym) do |res|
-        res.on_success { |preview| puts preview }
-        res.on_error { |err, result| warn_api_error('could not fetch preview', err, result) }
-      end
-    end
-
-    option :org, aliases: "-o", desc: "Organization", required: true
-    option :project, aliases: "-p", desc: "Project", required: true
-    option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
-    desc "preview-ep ID", "Preview an endpoint"
-    long_desc <<-LONGDESC
-      `xapixctl preview-ep` will return a preview of the given endpoint.
-
-      The preview function will not call any external data sources but calculate a preview based on the provided sample data.
-
-      Examples:
-      \x5> $ xapixctl preview-ep -o xapix -p some-project endpoint
-    LONGDESC
-    def preview_ep(endpoint)
-      connection.endpoint_preview(endpoint, org: options[:org], project: options[:project], format: options[:format].to_sym) do |res|
-        res.on_success { |preview| puts preview }
-        res.on_error { |err, result| warn_api_error('could not fetch preview', err, result) }
-      end
-    end
-
-    option :org, aliases: "-o", desc: "Organization", required: true
-    option :project, aliases: "-p", desc: "Project", required: true
     desc "publish", "Publishes the current version of the given project"
     long_desc <<-LONGDESC
       `xapixctl publish` will publish the given project.
@@ -229,44 +187,6 @@ module Xapixctl
         end
         res.on_error { |err, result| warn_api_error("could not get", err, result) }
       end
-    end
-
-    private
-
-    def warn_api_error(text, err, result)
-      details = "\n " + result['errors'].map { |k| k['detail'] }.join("\n ") rescue err.to_s
-      warn "#{text}: #{details}"
-      exit 1
-    end
-
-    def show_deployment_status(result)
-      return unless result && result['project_publication']
-      puts "deployment: #{result.dig('project_publication', 'deployment')}"
-      puts " data api: #{result.dig('project_publication', 'data_api')} (version: #{result.dig('project_publication', 'data_api_version').presence || 'n/a'})"
-      puts " user management: #{result.dig('project_publication', 'user_management')}"
-      if result.dig('project_publication', 'deployment') == 'success'
-        puts " base URL: #{result.dig('project_publication', 'base_url')}"
-      end
-    end
-
-    DOCUMENT_STRUCTURE = %w[version kind metadata definition].freeze
-    def resources_from_file(filename)
-      yaml_string = filename == '-' ? $stdin.read : IO.read(filename)
-      yaml_string.split(/^---\s*\n/).map { |yml| Psych.safe_load(yml) }.compact.each do |doc|
-        unless (DOCUMENT_STRUCTURE - doc.keys.map(&:to_s)).empty?
-          warn "does not look like a correct resource definition:"
-          warn doc.inspect
-          exit 1
-        end
-        yield doc
-      end
-    end
-
-    def connection
-      url = options[:xapix_url] || ENV['XAPIX_URL'] || 'https://cloud.xapix.io/'
-      token = options[:xapix_token] || ENV['XAPIX_TOKEN']
-      raise Thor::RequiredArgumentMissingError, "no XAPIX_TOKEN given. Either use --xapix_token [TOKEN] or set environment variable XAPIX_TOKEN (recommended)" if !token
-      PhoenixClient::Connection.new(url, token)
     end
   end
 end
