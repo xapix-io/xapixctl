@@ -80,10 +80,12 @@ module Xapixctl
         Schema
         DataSource
         Pipeline
+        Service
         EndpointGroup
         Endpoint
         StreamGroup
         Stream
+        Scheduler
         ApiPublishing
         ApiPublishingRole
       ].freeze
