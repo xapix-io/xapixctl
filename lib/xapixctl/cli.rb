@@ -126,7 +126,7 @@ module Xapixctl
         end
       elsif options[:file]
         resources_from_file(options[:file]) do |desc|
-          type = desc.dig('kind')
+          type = desc['kind']
           id = desc.dig('metadata', 'id')
           puts "deleting #{type} #{id}"
           connection.delete(type, id, org: options[:org], project: options[:project]) do |res|

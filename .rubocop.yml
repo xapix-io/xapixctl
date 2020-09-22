@@ -1,5 +1,6 @@
 AllCops:
-  TargetRubyVersion: 2.5
+  NewCops: enable
+  TargetRubyVersion: 2.6
   DisplayCopNames: true
   Exclude:
     - bin/*
@@ -25,3 +26,6 @@ Style/OptionHash:
 Metrics/BlockLength:
   Exclude:
     - spec/**/*
+
+Naming/RescuedExceptionsVariableName:
+  PreferredName: 'err'

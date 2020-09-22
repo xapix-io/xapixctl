@@ -2,7 +2,6 @@
 
 module Xapixctl
   module PhoenixClient
-
     class ResultHandler
       def initialize(default_success_handler:, default_error_handler:)
         @success_handler = default_success_handler
@@ -34,7 +33,7 @@ module Xapixctl
     end
 
     TEXT_FORMATTERS = {
-      all: ->(data) { "id  : %{id}\nkind: %{kind}\nname: %{name}\n\n" % { id: data.dig('metadata', 'id'), kind: data.dig('kind'), name: data.dig('definition', 'name') } }
+      all: ->(data) { "id  : %<id>s\nkind: %<kind>s\nname: %<name>s\n\n" % { id: data.dig('metadata', 'id'), kind: data['kind'], name: data.dig('definition', 'name') } }
     }.freeze
 
     FORMATTERS = {
