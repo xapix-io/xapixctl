@@ -39,7 +39,7 @@ module Xapixctl
 
     FORMATTERS = {
       json: ->(data) { JSON.pretty_generate(data) },
-      yaml: ->(data) { Psych.dump(data.deep_transform_keys! { |k| k.to_s.camelize(:lower) }) },
+      yaml: ->(data) { Psych.dump(data) },
       text: ->(data) { (TEXT_FORMATTERS[data.dig('metadata', 'type')] || TEXT_FORMATTERS[:all]).call(data) }
     }.freeze
 
