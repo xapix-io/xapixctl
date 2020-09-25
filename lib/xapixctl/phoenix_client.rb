@@ -80,12 +80,13 @@ module Xapixctl
         DataSource
         Pipeline
         Service
+        ServiceInstall
         EndpointGroup
         Endpoint
         StreamGroup
         Stream
-        Scheduler
         StreamProcessor
+        Scheduler
         ApiPublishing
         ApiPublishingRole
       ].freeze
