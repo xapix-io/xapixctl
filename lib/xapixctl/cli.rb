@@ -37,14 +37,7 @@ module Xapixctl
         end
       else
         connection.resource_ids(resource_type, org: options[:org], project: options[:project]) do |res|
-          res.on_success do |resource_ids|
-            resource_ids.each do |resource_id|
-              connection.resource(resource_type, resource_id, org: options[:org], project: options[:project], format: options[:format].to_sym) do |res|
-                res.on_success { |resource| puts resource }
-                res.on_error { |err, result| warn_api_error("could not get", err, result) }
-              end
-            end
-          end
+          res.on_success { |resource_ids| resource_ids.each { |res_id| get(resource_type, res_id) } }
           res.on_error { |err, result| warn_api_error("could not get", err, result) }
         end
       end
@@ -125,18 +118,15 @@ module Xapixctl
     def delete(resource_type = nil, resource_id = nil)
       if resource_type && resource_id
         connection.delete(resource_type, resource_id, org: options[:org], project: options[:project]) do |res|
-          res.on_success { puts 'DELETED' }
+          res.on_success { puts "DELETED #{resource_type} #{resource_id}" }
           res.on_error { |err, result| warn_api_error("could not delete", err, result) }
         end
       elsif options[:file]
         resources_from_file(options[:file]) do |desc|
-          type = desc['kind']
-          id = desc.dig('metadata', 'id')
-          puts "deleting #{type} #{id}"
-          connection.delete(type, id, org: options[:org], project: options[:project]) do |res|
-            res.on_success { puts "DELETED #{type} #{id}" }
-            res.on_error { |err, result| warn_api_error("could not delete", err, result); break }
-          end
+          res_type = desc['kind']
+          res_id = desc.dig('metadata', 'id')
+          puts "deleting #{res_type} #{res_id}"
+          delete(res_type, res_id)
         end
       else
         warn "need TYPE and ID or --file option"

@@ -13,7 +13,7 @@ module Xapixctl
     private
 
     def warn_api_error(text, err, result)
-      details = "\n " + result['errors'].map { |k| k['detail'] }.join("\n ") rescue err.to_s
+      details = result['errors'].map { |k| k['detail'] }.unshift('').join("\n ") rescue err.to_s
       warn "#{text}: #{details}"
       exit 1
     end
