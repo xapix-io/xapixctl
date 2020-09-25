@@ -83,11 +83,13 @@ module Xapixctl
       If applied on a project (i.e. organization and project are given), the given project is used.
 
       The given file should be in YAML format and can contain multiple resource definitions, each as it's own YAML document.
+      You can also provide a directory, in which case all files with yml/yaml extension will get loaded.
       You can also read from stdin by using '-'.
 
       Examples:
       \x5> $ xapixctl apply -o xapix -f get_a_list.yaml
       \x5> $ xapixctl apply -o xapix -p some-project -f get_a_list.yaml
+      \x5> $ xapixctl apply -o xapix -p some-project -f ./
 
       To copy over all data sources from one project to another:
       \x5> $ xapixctl get -o xapix-old -p some-project DataSource -f yaml | xapixctl apply -o xapix-new -f -
@@ -111,10 +113,12 @@ module Xapixctl
       \x5`xapixctl delete TYPE ID` will delete the resource by given TYPE and ID.
 
       The given file should be in YAML format and can contain multiple resource definitions, each as it's own YAML document.
+      You can also provide a directory, in which case all files with yml/yaml extension will get loaded.
       You can also read from stdin by using '-'.
 
       Examples:
       \x5> $ xapixctl delete -o xapix -p some-project -f get_a_list.yaml
+      \x5> $ xapixctl delete -o xapix -p some-project -f ./
       \x5> $ xapixctl delete -o xapix -p some-project DataSource get-a-list
       \x5> $ xapixctl delete -o xapix Project some-project
     LONGDESC

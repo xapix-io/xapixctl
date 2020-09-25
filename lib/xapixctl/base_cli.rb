@@ -30,14 +30,28 @@ module Xapixctl
 
     DOCUMENT_STRUCTURE = %w[version kind metadata definition].freeze
     def resources_from_file(filename)
-      yaml_string = filename == '-' ? $stdin.read : IO.read(filename)
-      yaml_string.split(/^---\s*\n/).map { |yml| Psych.safe_load(yml) }.compact.each do |doc|
-        unless (DOCUMENT_STRUCTURE - doc.keys.map(&:to_s)).empty?
-          warn "does not look like a correct resource definition:"
-          warn doc.inspect
-          exit 1
+      load_files(filename) do |yaml_string|
+        yaml_string.split(/^---\s*\n/).map { |yml| Psych.safe_load(yml) }.compact.each do |doc|
+          unless (DOCUMENT_STRUCTURE - doc.keys.map(&:to_s)).empty?
+            warn "does not look like a correct resource definition:"
+            warn doc.inspect
+            exit 1
+          end
+          yield doc
         end
-        yield doc
+      end
+    end
+
+    def load_files(filename)
+      if filename == '-'
+        yield $stdin.read
+      else
+        pn = Pathname.new(filename)
+        if pn.directory?
+          pn.glob(["**/*.yaml", "**/*.yml"]).sort.each { |dpn| yield dpn.read }
+        else
+          yield pn.read
+        end
       end
     end
 
