@@ -29,12 +29,12 @@ GEM
     mime-types-data (3.2020.0512)
     minitest (5.14.2)
     netrc (0.11.0)
-    parallel (1.19.2)
-    parser (2.7.1.5)
+    parallel (1.20.1)
+    parser (3.0.0.0)
       ast (~> 2.4.1)
     rainbow (3.0.0)
     rake (13.0.1)
-    regexp_parser (1.8.0)
+    regexp_parser (2.0.3)
     relaxed-rubocop (2.5)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
@@ -55,18 +55,18 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.9.0)
     rspec-support (3.9.3)
-    rubocop (0.92.0)
+    rubocop (1.8.1)
       parallel (~> 1.10)
-      parser (>= 2.7.1.5)
+      parser (>= 3.0.0.0)
       rainbow (>= 2.2.2, < 4.0)
-      regexp_parser (>= 1.7)
+      regexp_parser (>= 1.8, < 3.0)
       rexml
-      rubocop-ast (>= 0.5.0)
+      rubocop-ast (>= 1.2.0, < 2.0)
       ruby-progressbar (~> 1.7)
-      unicode-display_width (>= 1.4.0, < 2.0)
-    rubocop-ast (0.5.0)
+      unicode-display_width (>= 1.4.0, < 3.0)
+    rubocop-ast (1.4.0)
       parser (>= 2.7.1.5)
-    ruby-progressbar (1.10.1)
+    ruby-progressbar (1.11.0)
     thor (1.0.1)
     thread_safe (0.3.6)
     tzinfo (1.2.7)
@@ -74,7 +74,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.7)
-    unicode-display_width (1.7.0)
+    unicode-display_width (2.0.0)
 
 PLATFORMS
   ruby
@@ -84,7 +84,7 @@ DEPENDENCIES
   rake (~> 13.0)
   relaxed-rubocop (~> 2.5)
   rspec (~> 3.0)
-  rubocop (~> 0.89)
+  rubocop (~> 1.8)
   xapixctl!
 
 BUNDLED WITH
