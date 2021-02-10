@@ -2,32 +2,33 @@ PATH
   remote: .
   specs:
     xapixctl (1.1.2)
-      activesupport (>= 5.2.3, < 6.0.0)
+      activesupport (>= 5.2.3, < 7.0.0)
       rest-client (>= 2.1.0, < 3.0.0)
       thor (>= 1.0.0, < 1.1.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (5.2.4.4)
+    activesupport (6.1.2)
       concurrent-ruby (~> 1.0, >= 1.0.2)
-      i18n (>= 0.7, < 2)
-      minitest (~> 5.1)
-      tzinfo (~> 1.1)
+      i18n (>= 1.6, < 2)
+      minitest (>= 5.1)
+      tzinfo (~> 2.0)
+      zeitwerk (~> 2.3)
     ast (2.4.1)
-    concurrent-ruby (1.1.7)
+    concurrent-ruby (1.1.8)
     diff-lcs (1.4.4)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
     http-accept (1.7.0)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
-    i18n (1.8.5)
+    i18n (1.8.8)
       concurrent-ruby (~> 1.0)
     mime-types (3.3.1)
       mime-types-data (~> 3.2015)
-    mime-types-data (3.2020.0512)
-    minitest (5.14.2)
+    mime-types-data (3.2020.1104)
+    minitest (5.14.3)
     netrc (0.11.0)
     parallel (1.19.2)
     parser (2.7.1.5)
@@ -68,13 +69,13 @@ GEM
       parser (>= 2.7.1.5)
     ruby-progressbar (1.10.1)
     thor (1.0.1)
-    thread_safe (0.3.6)
-    tzinfo (1.2.7)
-      thread_safe (~> 0.1)
+    tzinfo (2.0.4)
+      concurrent-ruby (~> 1.0)
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.7)
     unicode-display_width (1.7.0)
+    zeitwerk (2.4.2)
 
 PLATFORMS
   ruby
