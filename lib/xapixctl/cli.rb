@@ -31,14 +31,10 @@ module Xapixctl
     LONGDESC
     def get(resource_type, resource_id = nil)
       if resource_id
-        connection.resource(resource_type, resource_id, org: options[:org], project: options[:project], format: options[:format].to_sym) do |res|
-          res.on_success { |resource| puts resource }
-          res.on_error { |err, result| warn_api_error("could not get", err, result) }
-        end
+        puts connection.resource(resource_type, resource_id, org: options[:org], project: options[:project], format: options[:format].to_sym)
       else
-        connection.resource_ids(resource_type, org: options[:org], project: options[:project]) do |res|
-          res.on_success { |resource_ids| resource_ids.each { |res_id| get(resource_type, res_id) } }
-          res.on_error { |err, result| warn_api_error("could not get", err, result) }
+        connection.resource_ids(resource_type, org: options[:org], project: options[:project]).each do |res_id|
+          get(resource_type, res_id)
         end
       end
     end
@@ -57,10 +53,7 @@ module Xapixctl
       \x5> $ xapixctl export -o xapix -p some-project -f yaml > some_project.yaml
     LONGDESC
     def export
-      connection.resource('Project', options[:project], org: options[:org], format: options[:format].to_sym) do |res|
-        res.on_success { |resource| puts resource }
-        res.on_error { |err, result| warn_api_error("could not get", err, result) }
-      end
+      get('Project', options[:project])
       (connection.resource_types_for_export - ['Project']).each { |type| get(type) }
     end
 
@@ -90,10 +83,8 @@ module Xapixctl
     def apply
       resources_from_file(options[:file]) do |desc|
         puts "applying #{desc['kind']} #{desc.dig('metadata', 'id')}"
-        connection.apply(desc, org: options[:org], project: options[:project]) do |res|
-          res.on_success { puts 'OK' }
-          res.on_error { |err, result| warn_api_error("could not apply changes", err, result); break }
-        end
+        connection.apply(desc, org: options[:org], project: options[:project])
+        puts "OK"
       end
     end
 
@@ -117,10 +108,8 @@ module Xapixctl
     LONGDESC
     def delete(resource_type = nil, resource_id = nil)
       if resource_type && resource_id
-        connection.delete(resource_type, resource_id, org: options[:org], project: options[:project]) do |res|
-          res.on_success { puts "DELETED #{resource_type} #{resource_id}" }
-          res.on_error { |err, result| warn_api_error("could not delete", err, result) }
-        end
+        connection.delete(resource_type, resource_id, org: options[:org], project: options[:project])
+        puts "DELETED #{resource_type} #{resource_id}"
       elsif options[:file]
         resources_from_file(options[:file]) do |desc|
           res_type = desc['kind']
@@ -145,7 +134,7 @@ module Xapixctl
     def publish
       connection.publish(org: options[:org], project: options[:project]) do |res|
         res.on_success { |result| show_deployment_status(result) }
-        res.on_error { |err, result| show_deployment_status(result); warn_api_error('errors', err, result) }
+        res.on_error { |err, result| show_deployment_status(result); exit_with_api_error(err, result) }
       end
     end
 
@@ -161,17 +150,14 @@ module Xapixctl
       \x5> $ xapixctl logs be9c8608-e291-460d-bc20-5a394c4079d4 -o xapix -p some-project
     LONGDESC
     def logs(correlation_id)
-      connection.logs(correlation_id, org: options[:org], project: options[:project]) do |res|
-        res.on_success { |result| puts result['logs'].to_yaml }
-        res.on_error { |err, result| warn_api_error('could not get logs', err, result) }
-      end
+      result = connection.logs(correlation_id, org: options[:org], project: options[:project])
+      puts result['logs'].to_yaml
     end
 
     SUPPORTED_CONTEXTS = ['Project', 'Organization'].freeze
     desc "api-resources", "retrieves a list of all available resource types"
     def api_resources
-      connection.available_resource_types do |res|
-        res.on_success do |available_types|
+      available_types = connection.available_resource_types
           format_str = "%20.20s %20.20s"
           puts format_str % ['Type', 'Required Context']
           available_types.sort_by { |desc| desc['type'] }.each do |desc|
@@ -179,8 +165,5 @@ module Xapixctl
             puts format_str % [desc['type'], desc['context']]
           end
         end
-        res.on_error { |err, result| warn_api_error("could not get", err, result) }
-      end
-    end
   end
 end

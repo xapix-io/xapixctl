@@ -91,10 +91,10 @@ module Xapixctl
         ApiPublishingRole
       ].freeze
 
-      def initialize(url, token)
+      def initialize(url, token, default_success_handler: DEFAULT_SUCCESS_HANDLER, default_error_handler: DEFAULT_ERROR_HANDLER)
         @client = RestClient::Resource.new(File.join(url, 'api/v1'), verify_ssl: false, accept: :json, content_type: :json, headers: { Authorization: "Bearer #{token}" })
-        @default_success_handler = DEFAULT_SUCCESS_HANDLER
-        @default_error_handler = DEFAULT_ERROR_HANDLER
+        @default_success_handler = default_success_handler
+        @default_error_handler = default_error_handler
       end
 
       def on_success(&block); @default_success_handler = block; self; end

@@ -12,9 +12,9 @@ module Xapixctl
 
     private
 
-    def warn_api_error(text, err, result)
+    def exit_with_api_error(err, result)
       details = result['errors'].map { |k| k['detail'] }.unshift('').join("\n ") rescue err.to_s
-      warn "#{text}: #{details}"
+      warn "API error: #{details}"
       exit 1
     end
 
@@ -56,10 +56,14 @@ module Xapixctl
     end
 
     def connection
-      url = options[:xapix_url] || ENV['XAPIX_URL'] || 'https://cloud.xapix.io/'
-      token = options[:xapix_token] || ENV['XAPIX_TOKEN']
-      raise Thor::RequiredArgumentMissingError, "no XAPIX_TOKEN given. Either use --xapix_token [TOKEN] or set environment variable XAPIX_TOKEN (recommended)" if !token
-      PhoenixClient::Connection.new(url, token)
+      @connection ||= begin
+        url = options[:xapix_url] || ENV['XAPIX_URL'] || 'https://cloud.xapix.io/'
+        token = options[:xapix_token] || ENV['XAPIX_TOKEN']
+        raise Thor::RequiredArgumentMissingError, "no XAPIX_TOKEN given. Either use --xapix_token [TOKEN] or set environment variable XAPIX_TOKEN (recommended)" if !token
+        PhoenixClient::Connection.new(
+          url, token,
+          default_error_handler: ->(err, result) { exit_with_api_error(err, result) })
+      end
     end
   end
 end
