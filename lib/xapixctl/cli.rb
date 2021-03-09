@@ -2,11 +2,15 @@
 
 require 'xapixctl/base_cli'
 require 'xapixctl/preview_cli'
+require 'xapixctl/sync_cli'
 
 module Xapixctl
   class Cli < BaseCli
     desc "preview SUBCOMMAND ...ARGS", "Request preview for resources"
     subcommand "preview", Preview
+
+    desc "sync SUBCOMMAND ...ARGS", "Sync resources"
+    subcommand "sync", Sync
 
     option :org, aliases: "-o", desc: "Organization", required: true
     option :project, aliases: "-p", desc: "Project"
@@ -158,12 +162,12 @@ module Xapixctl
     desc "api-resources", "retrieves a list of all available resource types"
     def api_resources
       available_types = connection.available_resource_types
-          format_str = "%20.20s %20.20s"
-          puts format_str % ['Type', 'Required Context']
-          available_types.sort_by { |desc| desc['type'] }.each do |desc|
-            next unless SUPPORTED_CONTEXTS.include?(desc['context'])
-            puts format_str % [desc['type'], desc['context']]
-          end
-        end
+      format_str = "%20.20s %20.20s"
+      puts format_str % ['Type', 'Required Context']
+      available_types.sort_by { |desc| desc['type'] }.each do |desc|
+        next unless SUPPORTED_CONTEXTS.include?(desc['context'])
+        puts format_str % [desc['type'], desc['context']]
+      end
+    end
   end
 end
