@@ -4,8 +4,6 @@ require 'xapixctl/base_cli'
 
 module Xapixctl
   class Preview < BaseCli
-    option :org, aliases: "-o", desc: "Organization", required: true
-    option :project, aliases: "-p", desc: "Project", required: true
     option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
     desc "pipeline ID", "Preview a pipeline"
     long_desc <<-LONGDESC
@@ -17,16 +15,12 @@ module Xapixctl
 
       Examples:
       \x5> $ xapixctl preview pipeline -o xapix -p some-project pipeline
+      \x5> $ xapixctl preview pipeline -p xapix/some-project pipeline
     LONGDESC
     def pipeline(pipeline)
-      connection.pipeline_preview(pipeline, org: options[:org], project: options[:project], format: options[:format].to_sym) do |res|
-        res.on_success { |preview| puts preview }
-        res.on_error { |err, result| warn_api_error('could not fetch preview', err, result) }
-      end
+      puts prj_connection.pipeline_preview(pipeline, format: options[:format].to_sym)
     end
 
-    option :org, aliases: "-o", desc: "Organization", required: true
-    option :project, aliases: "-p", desc: "Project", required: true
     option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
     desc "endpoint ID", "Preview an endpoint"
     long_desc <<-LONGDESC
@@ -36,16 +30,12 @@ module Xapixctl
 
       Examples:
       \x5> $ xapixctl preview endpoint -o xapix -p some-project endpoint
+      \x5> $ xapixctl preview endpoint -p xapix/some-project endpoint
     LONGDESC
     def endpoint(endpoint)
-      connection.endpoint_preview(endpoint, org: options[:org], project: options[:project], format: options[:format].to_sym) do |res|
-        res.on_success { |preview| puts preview }
-        res.on_error { |err, result| warn_api_error('could not fetch preview', err, result) }
-      end
+      puts prj_connection.endpoint_preview(endpoint, format: options[:format].to_sym)
     end
 
-    option :org, aliases: "-o", desc: "Organization", required: true
-    option :project, aliases: "-p", desc: "Project", required: true
     option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
     desc "stream-processor ID", "Preview a stream processor"
     long_desc <<-LONGDESC
@@ -55,12 +45,10 @@ module Xapixctl
 
       Examples:
       \x5> $ xapixctl preview stream-processor -o xapix -p some-project processor
+      \x5> $ xapixctl preview stream-processor -p xapix/some-project processor
     LONGDESC
     def stream_processor(stream_processor)
-      connection.stream_processor_preview(stream_processor, org: options[:org], project: options[:project], format: options[:format].to_sym) do |res|
-        res.on_success { |preview| puts preview }
-        res.on_error { |err, result| warn_api_error('could not fetch preview', err, result) }
-      end
+      puts prj_connection.stream_processor_preview(stream_processor, format: options[:format].to_sym)
     end
   end
 end
