@@ -36,11 +36,6 @@ module Xapixctl
         ProjectConnection.new(self, org, project)
       end
 
-      # deprecated
-      def onboarding(org:, project:)
-        ProjectConnection.new(self, org, project)
-      end
-
       def result_handler(block)
         ResultHandler.new(default_success_handler: @default_success_handler, default_error_handler: @default_error_handler, &block)
       end
