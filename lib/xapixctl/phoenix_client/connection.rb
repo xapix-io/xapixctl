@@ -3,13 +3,13 @@
 module Xapixctl
   module PhoenixClient
     class Connection
-      DEFAULT_CLIENT_OPTS = { verify_ssl: false, accept: :json }.freeze
+      DEFAULT_CLIENT_OPTS = { verify_ssl: false, headers: { accept: :json } }.freeze
 
       attr_reader :xapix_url, :client
 
       def initialize(url, token, default_success_handler, default_error_handler, logging)
         @xapix_url = url
-        client_opts = DEFAULT_CLIENT_OPTS.merge(headers: { Authorization: "Bearer #{token}" })
+        client_opts = DEFAULT_CLIENT_OPTS.deep_merge(headers: { Authorization: "Bearer #{token}" })
         client_opts.merge!(log: RestClient.create_log(logging)) if logging
         @client = RestClient::Resource.new(File.join(url, 'api/v1'), client_opts)
         @default_success_handler = default_success_handler

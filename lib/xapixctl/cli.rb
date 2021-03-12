@@ -111,7 +111,6 @@ module Xapixctl
         resources_from_file(options[:file]) do |desc|
           res_type = desc['kind']
           res_id = desc.dig('metadata', 'id')
-          puts "deleting #{res_type} #{res_id}"
           delete(res_type, res_id)
         end
       else
