@@ -18,7 +18,8 @@ GEM
       public_suffix (>= 2.0.2, < 5.0)
     ast (2.4.2)
     concurrent-ruby (1.1.8)
-    crack (0.4.4)
+    crack (0.4.5)
+      rexml
     diff-lcs (1.4.4)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
@@ -85,7 +86,7 @@ GEM
       unf_ext
     unf_ext (0.0.7.7)
     unicode-display_width (2.0.0)
-    webmock (3.11.0)
+    webmock (3.12.1)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
@@ -101,7 +102,7 @@ DEPENDENCIES
   rubocop (~> 1.11.0)
   rubocop-rake (~> 0.5.1)
   rubocop-rspec (~> 2.2.0)
-  webmock (~> 3.11.0)
+  webmock (~> 3.12.1)
   xapixctl!
 
 BUNDLED WITH
