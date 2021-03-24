@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    xapixctl (1.2.0)
+    xapixctl (1.2.1)
       activesupport (>= 5.2.3, < 6.0.0)
       rest-client (>= 2.1.0, < 3.0.0)
       thor (>= 1.0.0, < 1.2.0)
@@ -97,11 +97,11 @@ DEPENDENCIES
   bundler (~> 2.1.4)
   rake (~> 13.0)
   relaxed-rubocop (~> 2.5)
-  rspec (~> 3.0)
-  rubocop (~> 1.11)
-  rubocop-rake
-  rubocop-rspec
-  webmock
+  rspec (~> 3.10.0)
+  rubocop (~> 1.11.0)
+  rubocop-rake (~> 0.5.1)
+  rubocop-rspec (~> 2.2.0)
+  webmock (~> 3.11.0)
   xapixctl!
 
 BUNDLED WITH
