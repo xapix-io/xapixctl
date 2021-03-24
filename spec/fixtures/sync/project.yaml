@@ -1,0 +1,9 @@
+---
+version: v1
+kind: Project
+metadata:
+  id: reqres-vehicles-new
+definition:
+  name: reqres-vehicles-new
+  uuid: 1843ed78-60a9-4072-b780-56396b54970c
+  description: 'Reqres Vehicle Test Project'

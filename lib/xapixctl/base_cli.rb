@@ -1,15 +1,22 @@
 # frozen_string_literal: true
 
 require 'thor'
-require 'pathname'
+require 'xapixctl/util'
 
 module Xapixctl
   class BaseCli < Thor
     def self.exit_on_failure?; true; end
 
+    def self.start(given_args = ARGV, config = {})
+      super
+    rescue StandardError => err
+      config[:debug] || ENV["THOR_DEBUG"] == "1" ? (raise err) : config[:shell].error(err.message)
+      exit(false) if exit_on_failure?
+    end
+
     class_option :org, aliases: "-o", desc: "Organization; Fallback: environment variable XAPIX_ORG"
     class_option :project, aliases: "-p", desc: "Project, can be ORG/PROJECT; Fallback: environment variable XAPIX_PROJECT"
-    class_option :debug
+    class_option :debug, type: :boolean, desc: "Print details for debugging"
     class_option :xapix_url, desc: "Fallback: environment variable XAPIX_URL. URL to Xapix. Default: https://cloud.xapix.io/"
     class_option :xapix_token, desc: "Fallback: environment variable XAPIX_TOKEN. Your access token."
 
@@ -28,36 +35,6 @@ module Xapixctl
       puts " user management: #{result.dig('project_publication', 'user_management')}"
       if result.dig('project_publication', 'deployment') == 'success'
         puts " base URL: #{result.dig('project_publication', 'base_url')}"
-      end
-    end
-
-    DOCUMENT_STRUCTURE = %w[version kind metadata definition].freeze
-    def resources_from_file(filename, ignore_missing: false)
-      load_files(filename, ignore_missing) do |yaml_string|
-        yaml_string.split(/^---\s*\n/).map { |yml| Psych.safe_load(yml) }.compact.each do |doc|
-          unless (DOCUMENT_STRUCTURE - doc.keys.map(&:to_s)).empty?
-            warn "does not look like a correct resource definition:"
-            warn doc.inspect
-            exit 1
-          end
-          yield doc
-        end
-      end
-    end
-
-    def load_files(filename, ignore_missing)
-      if filename == '-'
-        yield $stdin.read
-      else
-        pn = filename.is_a?(Pathname) ? filename : Pathname.new(filename)
-        if pn.directory?
-          pn.glob(["**/*.yaml", "**/*.yml"]).sort.each { |dpn| yield dpn.read }
-        elsif pn.exist?
-          yield pn.read
-        elsif !ignore_missing
-          warn "file not found: #{filename}"
-          exit 1
-        end
       end
     end
 

@@ -3,7 +3,7 @@
 require 'xapixctl/base_cli'
 
 module Xapixctl
-  class Preview < BaseCli
+  class PreviewCli < BaseCli
     option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
     desc "pipeline ID", "Preview a pipeline"
     long_desc <<-LONGDESC

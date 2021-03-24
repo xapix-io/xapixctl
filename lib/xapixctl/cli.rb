@@ -7,10 +7,10 @@ require 'xapixctl/sync_cli'
 module Xapixctl
   class Cli < BaseCli
     desc "preview SUBCOMMAND ...ARGS", "Request preview for resources"
-    subcommand "preview", Preview
+    subcommand "preview", PreviewCli
 
     desc "sync SUBCOMMAND ...ARGS", "Sync resources"
-    subcommand "sync", Sync
+    subcommand "sync", SyncCli
 
     option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
     desc "get TYPE [ID]", "retrieve either all resources of given TYPE or just the resource of given TYPE and ID"
@@ -80,7 +80,7 @@ module Xapixctl
       \x5> $ xapixctl get -o xapix-old -p some-project DataSource -f yaml | xapixctl apply -o xapix-new -f -
     LONGDESC
     def apply
-      resources_from_file(options[:file]) do |desc|
+      Util.resources_from_file(options[:file]) do |desc|
         puts "applying #{desc['kind']} #{desc.dig('metadata', 'id')}"
         org_or_prj_connection.apply(desc)
       end
@@ -108,7 +108,7 @@ module Xapixctl
         org_or_prj_connection.delete(resource_type, resource_id)
         puts "DELETED #{resource_type} #{resource_id}"
       elsif options[:file]
-        resources_from_file(options[:file]) do |desc|
+        Util.resources_from_file(options[:file]) do |desc|
           res_type = desc['kind']
           res_id = desc.dig('metadata', 'id')
           delete(res_type, res_id)

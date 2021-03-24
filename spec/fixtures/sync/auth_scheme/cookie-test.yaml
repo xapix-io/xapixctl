@@ -1,0 +1,9 @@
+---
+version: v1
+kind: AuthScheme/Cookie
+metadata:
+  id: cookie-test
+  project: reqres-vehicles-new
+definition:
+  name: cookie-test
+  cookie: is_admin

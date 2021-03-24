@@ -2,7 +2,10 @@
 
 require "bundler/setup"
 require "xapixctl"
+require "xapixctl/cli"
 require 'webmock/rspec'
+
+ENV["THOR_DEBUG"] = "1"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -38,3 +41,9 @@ RSpec.configure do |config|
 end
 
 WebMock.disable_net_connect!(allow_localhost: true)
+
+module Xapixctl
+  class BaseCli
+    def self.exit_on_failure?; false; end
+  end
+end
