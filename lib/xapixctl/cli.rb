@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
 require 'xapixctl/base_cli'
+require 'xapixctl/connector_cli'
 require 'xapixctl/preview_cli'
 require 'xapixctl/sync_cli'
 
 module Xapixctl
   class Cli < BaseCli
+    desc "connectors SUBCOMMAND ...ARGS", "Commands for Connector resources"
+    subcommand "connectors", ConnectorCli
+
     desc "preview SUBCOMMAND ...ARGS", "Request preview for resources"
     subcommand "preview", PreviewCli
 

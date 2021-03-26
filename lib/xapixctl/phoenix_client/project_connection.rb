@@ -76,6 +76,18 @@ module Xapixctl
           run { @client[data_source_preview_path(data_source_id)].post(preview_data.to_json, content_type: :json) }
       end
 
+      def add_schema_import(spec_filename, &block)
+        spec_data = { schema_import: { file: File.new(spec_filename, 'r') } }
+        result_handler(block).
+          run { @client[schema_imports_path].post(spec_data) }
+      end
+
+      def update_schema_import(schema_import, spec_filename, &block)
+        spec_data = { schema_import: { file: File.new(spec_filename, 'r') } }
+        result_handler(block).
+          run { @client[schema_import_path(schema_import)].patch(spec_data) }
+      end
+
       def pipeline_preview(pipeline_id, format: :hash, &block)
         result_handler(block).
           prepare_data(->(data) { data['pipeline_preview'] }).
@@ -126,6 +138,14 @@ module Xapixctl
 
       def data_source_preview_path(id)
         "/projects/#{@org}/#{@project}/onboarding/data_sources/#{id}/preview"
+      end
+
+      def schema_imports_path
+        "/projects/#{@org}/#{@project}/onboarding/schema_imports"
+      end
+
+      def schema_import_path(schema_import)
+        "/projects/#{@org}/#{@project}/onboarding/schema_imports/#{schema_import}"
       end
 
       def resource_path(type, id)
