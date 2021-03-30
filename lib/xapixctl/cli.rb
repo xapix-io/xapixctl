@@ -4,6 +4,7 @@ require 'xapixctl/base_cli'
 require 'xapixctl/connector_cli'
 require 'xapixctl/preview_cli'
 require 'xapixctl/sync_cli'
+require 'xapixctl/titan_cli'
 
 module Xapixctl
   class Cli < BaseCli
@@ -15,6 +16,9 @@ module Xapixctl
 
     desc "sync SUBCOMMAND ...ARGS", "Sync resources"
     subcommand "sync", SyncCli
+
+    desc "titan SUBCOMMAND ...ARGS", "Tools for ML model deployments and service generation", hide: true
+    subcommand "titan", TitanCli
 
     option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
     desc "get TYPE [ID]", "retrieve either all resources of given TYPE or just the resource of given TYPE and ID"
