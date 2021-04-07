@@ -206,10 +206,10 @@ module Xapixctl
           name: 'Result',
           inputs: ['predict'],
           formulas: [{
-            ref: "#prediction.raw",
+            ref: "#prediction.percent",
             formula: "IF(.predict.status = 200, ROUND(100*coerce.to-float(.predict.body), 2))"
           }, {
-            ref: "#prediction.percent",
+            ref: "#prediction.raw",
             formula: "IF(.predict.status = 200, coerce.to-float(.predict.body))"
           }, {
             ref: "#success",
@@ -219,7 +219,7 @@ module Xapixctl
             formula: "IF(.predict.status <> 200, 'Model not trained!')"
           }],
           parameter_sample: {
-            "prediction" => { "percent" => 51, "raw" => 0.5112131 },
+            "prediction" => { "percent" => 51.12, "raw" => 0.5112131 },
             "success" => true,
             "error" => nil
           }
