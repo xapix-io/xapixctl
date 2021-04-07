@@ -31,6 +31,10 @@ module Xapixctl
       connector_refs = import_swagger(File.basename(url.path), schema)
       say "\n== Onboarding Connectors", :bold
       connectors = match_connectors_to_action(connector_refs)
+      if connectors.empty?
+        warn "\nNo valid connectors for ML service detected, not building service."
+        exit 1
+      end
       say "\n== Building Service", :bold
       service_doc = build_service(schema.dig('info', 'title'), connectors)
       res = prj_connection.apply(service_doc)
@@ -81,7 +85,8 @@ module Xapixctl
         say "\n#{connector['kind']} #{connector.dig('definition', 'name')} -> "
         if action
           say "#{action} action"
-          [action, update_connector_with_preview(connector)]
+          updated_connector = update_connector_with_preview(connector)
+          [action, updated_connector] if updated_connector
         else
           say "no action type detected, ignoring"
           nil
@@ -100,7 +105,7 @@ module Xapixctl
         res = prj_connection.accept_data_source_preview(connector.dig('metadata', 'id'))
         return res.dig('data_source', 'resource_description')
       end
-      connector
+      nil
     end
 
     def extract_schema(data_sample)
