@@ -2,6 +2,7 @@
 
 require 'xapixctl/base_cli'
 require 'pathname'
+require 'hashdiff'
 
 module Xapixctl
   class SyncCli < BaseCli
@@ -10,7 +11,7 @@ module Xapixctl
 
     desc "to-dir DIRECTORY", "Syncs resources in project to directory"
     long_desc <<-LONGDESC
-      `xapixctl sync to-dir DIRECTORY` will export all resources of a given project and remove any additional resources from the directory.
+      `xapixctl sync to-dir DIRECTORY -p org/prj` will export all resources of a given project and remove any additional resources from the directory.
 
       With --no-credentials you can exclude all credentials from getting exported.
 
@@ -24,7 +25,7 @@ module Xapixctl
       \x5> $ xapixctl sync to-dir ./project_dir -p xapix/some-project --exclude-types=ApiPublishing ApiPublishingRole Credential
     LONGDESC
     def to_dir(dir)
-      sync_path = SyncPath.new(dir, prj_connection.resource_types_for_export, excluded_types)
+      sync_path = SyncPath.new(shell, dir, prj_connection.resource_types_for_export, excluded_types)
 
       res_details = prj_connection.project_resource
       sync_path.write_file(generate_readme(res_details), 'README.md')
@@ -43,7 +44,7 @@ module Xapixctl
 
     desc "from-dir DIRECTORY", "Syncs resources in project from directory"
     long_desc <<-LONGDESC
-      `xapixctl sync from-dir project dir` will import all resources into the given project from the directory and remove any additional resources which are not present in the directory.
+      `xapixctl sync from-dir DIRECTORY -p org/prj` will import all resources into the given project from the directory and remove any additional resources which are not present in the directory.
 
       With --no-credentials you can exclude all credentials from getting exported.
 
@@ -55,10 +56,10 @@ module Xapixctl
       \x5> $ xapixctl sync from-dir ./project_dir -p xapix/some-project --exclude-types=ApiPublishing ApiPublishingRole Credential
     LONGDESC
     def from_dir(dir)
-      sync_path = SyncPath.new(dir, prj_connection.resource_types_for_export, excluded_types)
+      sync_path = SyncPath.new(shell, dir, prj_connection.resource_types_for_export, excluded_types)
 
       sync_path.load_resource('project') do |desc|
-        puts "applying #{desc['kind']} #{desc.dig('metadata', 'id')} to #{prj_connection.project}"
+        say "applying #{desc['kind']} #{desc.dig('metadata', 'id')} to #{prj_connection.project}"
         desc['metadata']['id'] = prj_connection.project
         prj_connection.organization.apply(desc)
       end
@@ -68,7 +69,7 @@ module Xapixctl
         res_path = sync_path.resource_path(type)
         updated_resource_ids = []
         res_path.load_resources do |desc|
-          puts "applying #{desc['kind']} #{desc.dig('metadata', 'id')}"
+          say "applying #{desc['kind']} #{desc.dig('metadata', 'id')}"
           updated_resource_ids += prj_connection.apply(desc)
         end
         outdated_resources[type] = prj_connection.resource_ids(type) - updated_resource_ids
@@ -76,16 +77,88 @@ module Xapixctl
 
       outdated_resources.each do |type, resource_ids|
         resource_ids.each do |resource_id|
-          puts "removing #{type} #{resource_id}"
+          say "removing #{type} #{resource_id}"
           prj_connection.delete(type, resource_id)
+        end
+      end
+    end
+
+    desc "diff DIRECTORY", "List resource which differ between project and directory"
+    long_desc <<-LONGDESC
+      `xapixctl sync diff DIRECTORY -p org/prj` will list the resources which are different between the given project and the given directory.
+
+      With --no-credentials you can exclude all credentials from getting exported.
+
+      With --exclude-types you can specify any resource types besides Project you'd like to exclude.
+
+      When only listing changed resources, the first character in a line indicates the status of the resource:
+      \x5 = - no changes
+      \x5 ~ - changed
+      \x5 ^ - in remote project
+      \x5 v - in directory
+
+      Examples:
+      \x5> $ xapixctl sync diff ./project_dir -p xapix/some-project
+      \x5> $ xapixctl sync diff ./project_dir -p xapix/some-project --no-credentials
+      \x5> $ xapixctl sync diff ./project_dir -p xapix/some-project --exclude-types=ApiPublishing ApiPublishingRole Credential
+    LONGDESC
+    option :details, desc: "Include detailed differences", type: :boolean, default: false
+    def diff(dir)
+      sync_path = SyncPath.new(shell, dir, prj_connection.resource_types_for_export, excluded_types)
+
+      sync_path.load_resource('project') do |desc|
+        desc['metadata']['id'] = prj_connection.project
+        res_details = prj_connection.project_resource
+        show_diff(desc, res_details)
+      end
+
+      sync_path.types_to_sync.each do |type|
+        res_path = sync_path.resource_path(type)
+        local_resource_ids = []
+        remote_resource_ids = prj_connection.resource_ids(type)
+        res_path.load_resources do |desc|
+          resource_id = desc['metadata']['id']
+          local_resource_ids << resource_id
+          if remote_resource_ids.include?(resource_id)
+            res_details = prj_connection.resource(type, desc['metadata']['id'])
+            show_diff(desc, res_details)
+          else
+            say "v #{type} #{resource_id}"
+          end
+        end
+        (remote_resource_ids - local_resource_ids).each do |resource_id|
+          say "^ #{type} #{resource_id}"
         end
       end
     end
 
     private
 
+    def show_diff(local, remote)
+      changed = local != remote
+      status = changed ? "~" : "="
+      say "#{status} #{local['kind']} #{local['metadata']['id']}"
+      return unless changed && options[:details]
+      shell.indent do
+        Hashdiff.diff(local, remote).each do |change|
+          status = change[0].tr('+-', '^v')
+          key = change[1]
+          say "#{status} #{key}"
+          shell.indent do
+            case status
+            when "~" then say "^ #{change[3]}\nv #{change[2]}"
+            else say "#{status} #{change[2]}" if change[2]
+            end
+          end
+        end
+      end
+    end
+
     class ResourcePath
-      def initialize(path)
+      delegate :say, to: :@shell
+
+      def initialize(shell, path)
+        @shell = shell
         @path = path
         @resource_files = []
       end
@@ -98,7 +171,7 @@ module Xapixctl
         end
         file = @path.join(filename)
         file.write(content)
-        puts "updated #{file}..."
+        say "updated #{file}..."
         file
       end
 
@@ -119,7 +192,7 @@ module Xapixctl
       def remove_outdated_resources
         (@path.glob('*.yaml') - @resource_files).each do |outdated_file|
           outdated_file.delete
-          puts "removed #{outdated_file}"
+          say "removed #{outdated_file}"
         end
       end
     end
@@ -127,8 +200,8 @@ module Xapixctl
     class SyncPath < ResourcePath
       attr_reader :types_to_sync
 
-      def initialize(dir, all_types, excluded_types)
-        super(Pathname.new(dir))
+      def initialize(shell, dir, all_types, excluded_types)
+        super(shell, Pathname.new(dir))
         @all_types = all_types
         @excluded_types_file = @path.join('.excluded_types')
         @excluded_types = excluded_types || []
@@ -136,11 +209,11 @@ module Xapixctl
         @excluded_types &= @all_types
         @excluded_types.sort!
         @types_to_sync = @all_types - @excluded_types
-        puts "Resource types excluded from sync: #{@excluded_types.join(', ')}" if @excluded_types.any?
+        say "Resource types excluded from sync: #{@excluded_types.join(', ')}" if @excluded_types.any?
       end
 
       def resource_path(type)
-        ResourcePath.new(@path.join(type.underscore))
+        ResourcePath.new(@shell, @path.join(type.underscore))
       end
 
       def update_excluded_types_file
