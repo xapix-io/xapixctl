@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    xapixctl (1.2.2)
+    xapixctl (1.2.3)
       activesupport (>= 5.2.3, < 6.0.0)
       hashdiff (>= 1.0.1, < 1.2.0)
       rest-client (>= 2.1.0, < 3.0.0)
