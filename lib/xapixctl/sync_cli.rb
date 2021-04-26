@@ -135,9 +135,11 @@ module Xapixctl
     private
 
     def show_diff(local, remote)
+      kind, id = local['kind'], local['metadata']['id']
+      local, remote = local.slice('definition'), remote.slice('definition')
       changed = local != remote
       status = changed ? "~" : "="
-      say "#{status} #{local['kind']} #{local['metadata']['id']}"
+      say "#{status} #{kind} #{id}"
       return unless changed && options[:details]
       shell.indent do
         Hashdiff.diff(local, remote).each do |change|
@@ -146,7 +148,7 @@ module Xapixctl
           say "#{status} #{key}"
           shell.indent do
             case status
-            when "~" then say "^ #{change[3]}\nv #{change[2]}"
+            when "~" then say "^ #{change[3]}"; say "v #{change[2]}"
             else say "#{status} #{change[2]}" if change[2]
             end
           end

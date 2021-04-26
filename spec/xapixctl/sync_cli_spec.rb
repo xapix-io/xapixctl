@@ -6,10 +6,11 @@ require 'active_support/core_ext/object/deep_dup'
 
 RSpec.describe Xapixctl::SyncCli do
   subject { Xapixctl::SyncCli }
+  let(:source_dir) { Pathname.new("./spec/fixtures/sync") }
   let(:default_args) { %w(--xapix_url=https://test.xapix --xapix_token=eyToken) }
   let(:resource_types) { [{ "type" => "Project", "context" => "Organization" }, { "type" => "AuthScheme", "context" => "Project" }, { "type" => "Credential", "context" => "Project" }] }
-  let(:project_doc) { Psych.load(File.read('spec/fixtures/sync/project.yaml')) }
-  let(:auth_scheme_doc) { Psych.load(File.read('spec/fixtures/sync/auth_scheme/cookie-test.yaml')) }
+  let(:project_doc) { Psych.load(source_dir.join('project.yaml').read) }
+  let(:auth_scheme_doc) { Psych.load(source_dir.join('auth_scheme/cookie-test.yaml').read) }
 
   before do
     stub_request(:get, "https://test.xapix/api/v1/resource_types").
@@ -89,7 +90,6 @@ RSpec.describe Xapixctl::SyncCli do
   end
 
   context "sync from-dir" do
-    let(:source_dir) { "./spec/fixtures/sync" }
     let(:adjusted_project) { project_doc.deep_dup.tap { |prj| prj['metadata']['id'] = 'project' } }
 
     before do
@@ -143,7 +143,7 @@ RSpec.describe Xapixctl::SyncCli do
     context 'with existing excludes' do
       around do |example|
         Dir.mktmpdir("rspec-") do |dir|
-          FileUtils.cp_r Pathname.new(source_dir).glob("*"), dir
+          FileUtils.cp_r(source_dir.glob("*"), dir)
           @temp_dir = Pathname.new(dir)
           @temp_dir.join(".excluded_types").write("AuthScheme\n")
           example.run
@@ -160,6 +160,66 @@ RSpec.describe Xapixctl::SyncCli do
           EOOUT
         )
       end
+    end
+  end
+
+  context "diff" do
+    let(:changed_auth_scheme_doc) { auth_scheme_doc.tap { |doc| doc['definition']['cookie'] = 'is_real_admin' } }
+
+    around do |example|
+      Dir.mktmpdir("rspec-") do |dir|
+        FileUtils.cp_r(source_dir.glob("*"), dir)
+        @temp_dir = Pathname.new(dir)
+        @temp_dir.join('auth_scheme', 'another-scheme.yaml').write("---\nversion: 1\nkind: AuthScheme/Token\nmetadata:\n  id: another-scheme\ndefinition: {}\n")
+        example.run
+      end
+    end
+
+    before do
+      stub_request(:get, "https://test.xapix/api/v1/orgs/test/Project/project").
+        with(headers: { 'Accept' => 'application/json', 'Authorization' => 'Bearer eyToken' }).
+        to_return(status: 200, body: project_doc.to_json, headers: {})
+
+      stub_request(:get, "https://test.xapix/api/v1/projects/test/project/AuthScheme").
+        with(headers: { 'Accept' => 'application/json', 'Authorization' => 'Bearer eyToken' }).
+        to_return(status: 200, body: { resource_ids: ['cookie-test', 'some-scheme'] }.to_json, headers: {})
+
+      stub_request(:get, "https://test.xapix/api/v1/projects/test/project/AuthScheme/cookie-test").
+        with(headers: { 'Accept' => 'application/json', 'Authorization' => 'Bearer eyToken' }).
+        to_return(status: 200, body: changed_auth_scheme_doc.to_json, headers: {})
+
+      stub_request(:get, "https://test.xapix/api/v1/projects/test/project/Credential").
+        with(headers: { 'Accept' => 'application/json', 'Authorization' => 'Bearer eyToken' }).
+        to_return(status: 200, body: { resource_ids: ['some-cred'] }.to_json, headers: {})
+    end
+
+    it 'shows diff overview' do
+      output = run_cli %W(diff #{@temp_dir} -p test/project)
+      expect(output).to eq(
+        <<~EOOUT
+          = Project project
+          v AuthScheme another-scheme
+          ~ AuthScheme/Cookie cookie-test
+          ^ AuthScheme some-scheme
+          ^ Credential some-cred
+        EOOUT
+      )
+    end
+
+    it 'shows diff details' do
+      output = run_cli %W(diff #{@temp_dir} -p test/project --details)
+      expect(output).to eq(
+        <<~EOOUT
+          = Project project
+          v AuthScheme another-scheme
+          ~ AuthScheme/Cookie cookie-test
+            ~ definition.cookie
+              ^ is_real_admin
+              v is_admin
+          ^ AuthScheme some-scheme
+          ^ Credential some-cred
+        EOOUT
+      )
     end
   end
 end
