@@ -69,6 +69,14 @@ RSpec.describe Xapixctl::SyncCli do
       expect(@temp_dir.join('.excluded_types').read).to eq("AuthScheme\n")
     end
 
+    it 'excludes credentials' do
+      run_cli %W(to-dir #{@temp_dir} -p test/project --no-credentials)
+      expect(@temp_dir.join('project.yaml')).to be_file
+      expect(Psych.load(@temp_dir.join('project.yaml').read)).to eq(project_doc)
+      expect(@temp_dir.join('auth_scheme')).to exist
+      expect(@temp_dir.join('.excluded_types').read).to eq("Credential\n")
+    end
+
     it 'updates sync dir' do
       @temp_dir.join('auth_scheme').mkdir
       @temp_dir.join('auth_scheme', 'another-scheme.yaml').write("---")

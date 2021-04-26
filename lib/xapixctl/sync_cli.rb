@@ -222,7 +222,7 @@ module Xapixctl
     end
 
     def excluded_types
-      excluded = options[:exclude_types]
+      excluded = options[:exclude_types] || []
       excluded += ['Credential'] unless options[:credentials]
       excluded
     end
