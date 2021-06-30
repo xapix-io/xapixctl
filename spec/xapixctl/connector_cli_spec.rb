@@ -52,8 +52,8 @@ RSpec.describe Xapixctl::ConnectorCli do
             created Schema openapi-2-0-http-petstore-swagger-io-api
 
             connectors:
-             - DataSource/REST get_pets
-             - DataSource/REST post_pet
+              - DataSource/REST get_pets
+              - DataSource/REST post_pet
           EOOUT
         )
       end
@@ -74,14 +74,14 @@ RSpec.describe Xapixctl::ConnectorCli do
               created Schema openapi-2-0-http-petstore-swagger-io-api
 
               import issues:
-               - Connector type "application/x-custom and application/x-super-custom" not supported
+                - Connector type "application/x-custom and application/x-super-custom" not supported
 
               validation issues:
-               - Something didn't validate
+                - Something didn't validate
 
               connectors:
-               - DataSource/REST get_pets
-               - DataSource/REST post_pet
+                - DataSource/REST get_pets
+                - DataSource/REST post_pet
             EOOUT
           )
         end
@@ -122,8 +122,8 @@ RSpec.describe Xapixctl::ConnectorCli do
             updated Schema openapi-2-0-http-petstore-swagger-io-api
 
             connectors:
-             - DataSource/REST get_pets
-             - DataSource/REST post_pet
+              - DataSource/REST get_pets
+              - DataSource/REST post_pet
           EOOUT
         )
       end

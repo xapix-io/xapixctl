@@ -30,11 +30,13 @@ module Xapixctl
 
     def show_deployment_status(result)
       return unless result && result['project_publication']
-      puts "deployment: #{result.dig('project_publication', 'deployment')}"
-      puts " data api: #{result.dig('project_publication', 'data_api')} (version: #{result.dig('project_publication', 'data_api_version').presence || 'n/a'})"
-      puts " user management: #{result.dig('project_publication', 'user_management')}"
-      if result.dig('project_publication', 'deployment') == 'success'
-        puts " base URL: #{result.dig('project_publication', 'base_url')}"
+      say "deployment: #{result.dig('project_publication', 'deployment')}"
+      shell.indent do
+        say "data api: #{result.dig('project_publication', 'data_api')} (version: #{result.dig('project_publication', 'data_api_version').presence || 'n/a'})"
+        say "user management: #{result.dig('project_publication', 'user_management')}"
+        if result.dig('project_publication', 'deployment') == 'success'
+          say "base URL: #{result.dig('project_publication', 'base_url')}"
+        end
       end
     end
 

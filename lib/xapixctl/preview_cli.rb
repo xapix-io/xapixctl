@@ -18,7 +18,7 @@ module Xapixctl
       \x5> $ xapixctl preview pipeline -p xapix/some-project pipeline
     LONGDESC
     def pipeline(pipeline)
-      puts prj_connection.pipeline_preview(pipeline, format: options[:format].to_sym)
+      say prj_connection.pipeline_preview(pipeline, format: options[:format].to_sym)
     end
 
     option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
@@ -33,7 +33,7 @@ module Xapixctl
       \x5> $ xapixctl preview endpoint -p xapix/some-project endpoint
     LONGDESC
     def endpoint(endpoint)
-      puts prj_connection.endpoint_preview(endpoint, format: options[:format].to_sym)
+      say prj_connection.endpoint_preview(endpoint, format: options[:format].to_sym)
     end
 
     option :format, aliases: "-f", default: 'text', enum: ['text', 'yaml', 'json'], desc: "Output format"
@@ -48,7 +48,7 @@ module Xapixctl
       \x5> $ xapixctl preview stream-processor -p xapix/some-project processor
     LONGDESC
     def stream_processor(stream_processor)
-      puts prj_connection.stream_processor_preview(stream_processor, format: options[:format].to_sym)
+      say prj_connection.stream_processor_preview(stream_processor, format: options[:format].to_sym)
     end
   end
 end

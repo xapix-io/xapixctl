@@ -44,7 +44,7 @@ module Xapixctl
       conn = org_or_prj_connection
       resource_ids = resource_id ? [resource_id] : conn.resource_ids(resource_type)
       resource_ids.each do |res_id|
-        puts conn.resource(resource_type, res_id, format: options[:format].to_sym)
+        say conn.resource(resource_type, res_id, format: options[:format].to_sym)
       end
     end
 
@@ -89,7 +89,7 @@ module Xapixctl
     LONGDESC
     def apply
       Util.resources_from_file(options[:file]) do |desc|
-        puts "applying #{desc['kind']} #{desc.dig('metadata', 'id')}"
+        say "applying #{desc['kind']} #{desc.dig('metadata', 'id')}"
         org_or_prj_connection.apply(desc)
       end
     end
@@ -114,7 +114,7 @@ module Xapixctl
     def delete(resource_type = nil, resource_id = nil)
       if resource_type && resource_id
         org_or_prj_connection.delete(resource_type, resource_id)
-        puts "DELETED #{resource_type} #{resource_id}"
+        say "DELETED #{resource_type} #{resource_id}"
       elsif options[:file]
         Util.resources_from_file(options[:file]) do |desc|
           res_type = desc['kind']
@@ -153,20 +153,19 @@ module Xapixctl
     LONGDESC
     def logs(correlation_id)
       result = prj_connection.logs(correlation_id)
-      puts result['logs'].to_yaml
+      say result['logs'].to_yaml
     end
 
     SUPPORTED_CONTEXTS = ['Project', 'Organization'].freeze
 
     desc "api-resources", "retrieves a list of all available resource types"
     def api_resources
-      available_types = connection.available_resource_types
-      format_str = "%20.20s %20.20s %26.26s"
-      puts format_str % ['Type', 'Required Context', '']
-      available_types.sort_by { |desc| desc['type'] }.each do |desc|
-        next unless SUPPORTED_CONTEXTS.include?(desc['context'])
-        puts format_str % [desc['type'], desc['context'], PhoenixClient.supported_type?(desc['type']) ? '' : '(unsupported, update CLI)']
+      available_types = connection.available_resource_types.sort_by { |desc| desc['type'] }.filter { |desc| SUPPORTED_CONTEXTS.include?(desc['context']) }
+      table = [['Type', 'Required Context', '']]
+      table += available_types.map do |desc|
+        [desc['type'], desc['context'], PhoenixClient.supported_type?(desc['type']) ? '' : '(unsupported, update CLI)']
       end
+      print_table table, indent: 1
     end
   end
 end

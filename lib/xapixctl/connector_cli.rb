@@ -20,29 +20,29 @@ module Xapixctl
         exit 1
       end
       if options[:schema_import]
-        puts "uploading to update schema import '#{options[:schema_import]}': #{spec_filename}..."
+        say "uploading to update schema import '#{options[:schema_import]}': #{spec_filename}..."
         result = prj_connection.update_schema_import(options[:schema_import], spec_filename)
-        puts "updated #{result.dig('resource', 'kind')} #{result.dig('resource', 'id')}"
+        say "updated #{result.dig('resource', 'kind')} #{result.dig('resource', 'id')}"
       else
-        puts "uploading as new import: #{spec_filename}..."
+        say "uploading as new import: #{spec_filename}..."
         result = prj_connection.add_schema_import(spec_filename)
-        puts "created #{result.dig('resource', 'kind')} #{result.dig('resource', 'id')}"
+        say "created #{result.dig('resource', 'kind')} #{result.dig('resource', 'id')}"
       end
 
       [['issues', 'import'], ['validation_issues', 'validation']].each do |key, name|
         issues = result.dig('schema_import', 'report', key)
         if issues.any?
-          puts "\n#{name} issues:"
-          issues.each { |issue| puts " - #{issue}" }
+          say "\n#{name} issues:"
+          shell.indent { issues.each { |issue| say "- #{issue}" } }
         end
       end
 
       updated_resources = result.dig('schema_import', 'updated_resources')
       if updated_resources.any?
-        puts "\nconnectors:"
-        updated_resources.each { |resource| puts " - #{resource['kind']} #{resource['id']}" }
+        say "\nconnectors:"
+        shell.indent { updated_resources.each { |resource| say "- #{resource['kind']} #{resource['id']}" } }
       else
-        puts "\nno connectors created/updated."
+        say "\nno connectors created/updated."
       end
     end
   end
