@@ -20,9 +20,9 @@ module Xapixctl
       CacheConnection
       Schema
       DataSource
-      Pipeline
       Service
       ServiceInstall
+      Pipeline
       EndpointGroup
       Endpoint
       StreamGroup
@@ -31,6 +31,7 @@ module Xapixctl
       Scheduler
       ApiPublishing
       ApiPublishingRole
+      ApiPublishingAccessRule
     ].freeze
 
     TEXT_FORMATTERS = {
